@@ -1,53 +1,42 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; 
+import 'react-quill/dist/quill.snow.css'; // Import ReactQuill styles
 import Dropzone from '../components/Dropzone';
+import dynamic from 'next/dynamic'; 
 
-export default function ProductTable() {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [editingProduct, setEditingProduct] = useState(null);
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+
+export default function PostTable() {
+  const [posts, setPosts] = useState([]);
+  const [editingPost, setEditingPost] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
- 
 
-  // Fetch products and categories on load
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
+    fetchPosts();
   }, []);
 
-  const fetchProducts = async () => {
-    const response = await fetch('/api/products');
+  const fetchPosts = async () => {
+    const response = await fetch('/api/posts');
     if (response.ok) {
       const data = await response.json();
-      setProducts(data);
+      setPosts(data);
     } else {
-      console.error('Failed to fetch products');
-    }
-  };
-
-  const fetchCategories = async () => {
-    const response = await fetch('/api/category');
-    if (response.ok) {
-      const data = await response.json();
-      setCategories(data);
-    } else {
-      console.error('Failed to fetch categories');
+      console.error('Failed to fetch posts');
     }
   };
 
   const handleDelete = async (id) => {
-    if (confirm('Are you sure you want to delete this product?')) {
+    if (confirm('Are you sure you want to delete this post?')) {
       try {
-        const response = await fetch(`/api/products/${id}`, {
+        const response = await fetch(`/api/posts/${id}`, {
           method: 'DELETE',
         });
         if (response.ok) {
-          alert('Product deleted successfully');
-          fetchProducts();
+          alert('Post deleted successfully');
+          fetchPosts();
         } else {
-          console.error('Failed to delete product');
+          console.error('Failed to delete post');
         }
       } catch (error) {
         console.error('Error:', error);
@@ -55,68 +44,46 @@ export default function ProductTable() {
     }
   };
 
-  const handleEdit = (product) => {
-    setEditingProduct(product);
+  const handleEdit = (post) => {
+    setEditingPost(post);
   };
 
-  const handleUpdate = async (updatedProduct) => {
+  const handleUpdate = async (updatedPost) => {
     try {
-      const response = await fetch(`/api/products/${updatedProduct.id}`, {
+      const response = await fetch(`/api/posts/${updatedPost.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedProduct),
+        body: JSON.stringify(updatedPost),
       });
 
       if (response.ok) {
-        alert('Product updated successfully');
-        setEditingProduct(null);
-        fetchProducts();
+        alert('Post updated successfully');
+        setEditingPost(null);
+        fetchPosts();
       } else {
-        console.error('Failed to update product');
+        console.error('Failed to update post');
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  // Filter products by search query
-  const filterBySearch = (product) => {
-    return product.title.toLowerCase().includes(searchQuery.toLowerCase());
+  const filterBySearch = (post) => {
+    return post.title.toLowerCase().includes(searchQuery.toLowerCase());
   };
 
-  // Filter products by selected category
-  const filterByCategory = (product) => {
-    const isFilteredByCategory = selectedCategory ? product.category === selectedCategory : true;
-    
-    // Log the filtering process for debugging
-    console.log(`Filtering product: ${product.title} | Category: ${product.category} | Selected Category: ${selectedCategory} | Show: ${isFilteredByCategory}`);
-    
-    return isFilteredByCategory;
-  };
-
-  // Apply both search and category filters
-  const filteredProducts = products.filter((product) => {
-    return filterBySearch(product) && filterByCategory(product);
-  });
-
-  // Log the filtered products to check what's being displayed
-  useEffect(() => {
-    console.log("Filtered products:", filteredProducts);
-  }, [filteredProducts]);
-
-
-
+  const filteredPosts = posts.filter((post) => filterBySearch(post));
 
   return (
     <div className="max-w-6xl mx-auto p-4">
-      {editingProduct && (
-        <EditProductForm
-          product={editingProduct}
-          onCancel={() => setEditingProduct(null)}
+      {editingPost && (
+        <EditPostForm
+          post={editingPost}
+          onCancel={() => setEditingPost(null)}
           onSave={handleUpdate}
         />
       )}
-      <h1 className="text-2xl font-bold mb-4">Product List</h1>
+      <h1 className="text-2xl font-bold mb-4">Post List</h1>
 
       {/* Search Input */}
       <div className="mb-4">
@@ -129,54 +96,30 @@ export default function ProductTable() {
         />
       </div>
 
-      {/* Category Filter */}
-      <div className="mb-4">
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="w-full border p-2"
-        >
-          <option value="">Select a category</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.name}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
       <table className="table-auto w-full border-collapse border border-gray-200 mb-4">
         <thead>
           <tr className="bg-gray-100">
             <th className="border p-2">Title</th>
             <th className="border p-2">Pic</th>
-            <th className="border p-2">Price (USD)</th> 
-            <th className="border p-2">Brand</th>
-            <th className="border p-2">Type</th>
-            <th className="border p-2">Category</th>
             <th className="border p-2">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {filteredProducts.map((product) => (
-            <tr key={product.id} className="hover:bg-gray-50">
-              <td className="border p-2">{product.title}</td>
+          {filteredPosts.map((post) => (
+            <tr key={post.id} className="hover:bg-gray-50">
+              <td className="border p-2">{post.title}</td>
               <td className="border p-2">
-                <img src={product.img[0]} alt="Product Image" className="w-24 h-auto" />
+                <img src={post.img[0]} alt="Post Image" className="w-24 h-auto" />
               </td>
-              <td className="border p-2">{product.price}</td> 
-              <td className="border p-2">{product.brand}</td>
-              <td className="border p-2">{product.type}</td>
-              <td className="border p-2">{product.category}</td>
               <td className="border p-2">
                 <button
-                  onClick={() => handleEdit(product)}
+                  onClick={() => handleEdit(post)}
                   className="bg-yellow-500 text-white px-2 py-1 mr-2"
                 >
                   Edit
                 </button>
                 <button
-                  onClick={() => handleDelete(product.id)}
+                  onClick={() => handleDelete(post.id)}
                   className="bg-red-500 text-white px-2 py-1"
                 >
                   Delete
@@ -190,32 +133,42 @@ export default function ProductTable() {
   );
 }
 
-function EditProductForm({ product, onCancel, onSave }) {
-  const [title, setTitle] = useState(product.title);
-  const [price, setPrice] = useState(product.price); 
-  const [img, setImg] = useState(product.img || []);
+function EditPostForm({ post, onCancel, onSave }) {
+  const [title, setTitle] = useState(post.title);
+  const [description, setDescription] = useState(post.description || '');
+  const [img, setImg] = useState(post.img || []);
+  const [img1, setImg1] = useState(post.img1 || []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave({
-      ...product,
+      ...post,
       title,
-      price, 
-      img
+      description,
+      img,
+      img1,
     });
   };
-
 
   const handleImgChange = (url) => {
     if (url) {
       setImg(url);
     }
-  }
-  
+  };
+
+  const handleImgChange1 = (url) => {
+    if (url) {
+      setImg1(url);
+    }
+  };
+
+  const handleQuillChange = (value) => {
+    setDescription(value);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="border p-4 bg-gray-100 rounded">
-      <h2 className="text-xl font-bold mb-4">Edit Product</h2>
+      <h2 className="text-xl font-bold mb-4">Edit Post</h2>
 
       <div className="mb-4">
         <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
@@ -231,18 +184,15 @@ function EditProductForm({ product, onCancel, onSave }) {
       </div>
 
       <div className="mb-4">
-        <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price</label>
-        <input
-          id="price"
-          type="text"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          className="w-full border p-2"
-          placeholder="Price"
-          required
+        <label className="block text-sm font-medium text-gray-700">Description</label>
+        <ReactQuill
+          value={description}
+          onChange={handleQuillChange}
+          className="mb-4"
+          theme="snow"
+          placeholder="Write your description here..."
         />
       </div>
- 
 
       <style
         dangerouslySetInnerHTML={{
@@ -250,9 +200,13 @@ function EditProductForm({ product, onCancel, onSave }) {
             "\n  .uploadcare--widget {\n    background:black;\n  }\n  "
         }}
       />
+      <label className="block text-sm font-medium text-gray-700 mt-4">Cover Image</label>
       <Dropzone defaultValue={img} HandleImagesChange={handleImgChange} />
 
-      <div className="flex gap-2">
+      <label className="block text-sm font-medium text-gray-700 mt-4">Gallery</label>
+      <Dropzone defaultValue={img1} HandleImagesChange={handleImgChange1} />
+
+      <div className="flex gap-2 mt-6">
         <button type="submit" className="bg-green-500 text-white px-4 py-2">
           Save
         </button>

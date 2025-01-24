@@ -45,34 +45,15 @@ export default function RootLayout({
             <ul className="nav flex-column mt-4">
               <li className="nav-item mb-3">
                 <a href="/dashboard" className="nav-link text-white">
-                  All Products
+                  All Posts
                 </a>
               </li>
               <li className="nav-item">
                 <a href="/products" className="nav-link text-white">
-                  Add Product
+                  Add Post
                 </a>
               </li>
-              <li className="nav-item">
-                <a href="/category" className="nav-link text-white">
-                  Add Category
-                </a>
-              </li> 
-              <li className="nav-item">
-                <a href="/brand" className="nav-link text-white">
-                  Add Brand
-                </a>
-              </li> 
-              <li className="nav-item">
-                <a href="/home" className="nav-link text-white">
-                  Home Section
-                </a>
-              </li> 
-              <li className="nav-item">
-                <a href="/reservation" className="nav-link text-white">
-                  Orders
-                </a>
-              </li> 
+ 
               <li className="nav-item">
                 <a href="/" className="nav-link text-white">
                   logout

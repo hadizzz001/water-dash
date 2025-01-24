@@ -6,19 +6,15 @@ const prisma = new PrismaClient();
 export async function PATCH(request, { params }) {
   const { id } = params;
   const {
-    title, 
-    price, 
-    img
+    title, description, img, img1
   } = await request.json();
 
   try {
     // Update product and its specifications
-    const updatedProduct = await prisma.product.update({
+    const updatedProduct = await prisma.posts.update({
       where: { id },
       data: {
-        title, 
-        price, 
-        img
+        title, description, img, img1
       },
     });
 
@@ -40,7 +36,7 @@ export async function DELETE(request, { params }) {
  
 
     // Delete the product
-    await prisma.product.delete({
+    await prisma.posts.delete({
       where: { id },
     });
 

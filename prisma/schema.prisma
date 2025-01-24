@@ -7,56 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Product {
+model Posts {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
-  description String
-  price       String
-  img         String[]
-  category    String
-  type        String
-  brand        String
-  createdAt   DateTime @default(now())
+  description String 
+  img         String[] 
+  img1         String[] 
 }
-
-model Category {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  name String @unique
-  type String
-}
-
-model Brand {
-  id   String   @id @default(auto()) @map("_id") @db.ObjectId
-  name String   @unique 
-  img  String[]
-}
-
-
-model homeB {
-  id   String   @id @default(auto()) @map("_id") @db.ObjectId
-  name String   
-  desc String    
-  img  String[]
-  link String
-}
-
-model homeA {
-  id   String   @id @default(auto()) @map("_id") @db.ObjectId 
-  desc String     
-}
-
-
-model homeS {
-  id   String   @id @default(auto()) @map("_id") @db.ObjectId
-  name String   
-  desc String    
-  img  String[]
-  link String
-}
-
-
-model Order {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userInfo  Json
-  cartItems Json
-}
+ 
